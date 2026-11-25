@@ -1,0 +1,89 @@
+name: Nuxt Build
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: Container image name
+        type: string
+        required: true
+
+      tag:
+        description: Container image tag
+        type: string
+        default: latest
+
+      runner:
+        description: GitHub Actions runner
+        type: string
+        default: ubuntu-latest
+
+      dockerfile:
+        description: Path to Dockerfile
+        type: string
+        default: Dockerfile.production
+
+      context:
+        description: Docker build context
+        type: string
+        default: .
+
+      platforms:
+        description: Target Docker platforms
+        type: string
+        default: linux/amd64
+
+      push:
+        description: Push image to GHCR
+        type: boolean
+        default: true
+
+    secrets:
+      SENTRY_AUTH_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ${{ inputs.runner }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Login to GitHub Container Registry
+        if: inputs.push
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          push: ${{ inputs.push }}
+          platforms: ${{ inputs.platforms }}
+
+          tags: |
+            ghcr.io/origami-systems/${{ inputs.image }}:${{ inputs.tag }}
+            ghcr.io/origami-systems/${{ inputs.image }}:${{ github.sha }}
+
+          cache-from: type=gha,scope=nuxt-build-${{ inputs.dockerfile }}
+          cache-to: type=gha,mode=max,scope=nuxt-build-${{ inputs.dockerfile }}
+
+          secrets: |
+            "ORIGAMI_SYSTEMS_PACKAGES=${{ secrets.GITHUB_TOKEN }}"
+            "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+            "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}"

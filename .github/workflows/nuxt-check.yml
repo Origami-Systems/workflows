@@ -1,0 +1,45 @@
+name: Nuxt Check
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: GitHub Actions runner
+        type: string
+        default: ubuntu-latest
+
+      working-directory:
+        description: Project working directory
+        type: string
+        default: .
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  typecheck:
+    runs-on: ${{ inputs.runner }}
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Vite+
+        uses: voidzero-dev/setup-vp@v1.22.0
+        with:
+          cache: true
+          registry-url: https://npm.pkg.github.com/
+          scope: "@origami-systems"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare Nuxt
+        run: vp run nuxt prepare
+
+      - name: Check project
+        run: vp check

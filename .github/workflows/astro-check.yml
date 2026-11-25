@@ -1,0 +1,58 @@
+name: Astro Check
+
+on:
+    workflow_call:
+        inputs:
+            runner:
+                description: GitHub Actions runner
+                type: string
+                default: ubuntu-latest
+
+            node-version:
+                description: Node.js version
+                type: string
+                default: "26.13.1"
+
+            working-directory:
+                description: Project working directory
+                type: string
+                default: .
+
+            build-command:
+                description: Command used to build the site
+                type: string
+                default: vp run build
+
+permissions:
+    contents: read
+    packages: read
+
+jobs:
+    build:
+        runs-on: ${{ inputs.runner }}
+
+        defaults:
+            run:
+                working-directory: ${{ inputs.working-directory }}
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v6
+
+            - name: Set up Vite+
+              uses: voidzero-dev/setup-vp@v1.22.0
+              with:
+                  node-version: ${{ inputs.node-version }}
+                  cache: true
+                  registry-url: https://npm.pkg.github.com/
+                  scope: "@origami-systems"
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Install dependencies
+              run: vp install
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build site
+              run: ${{ inputs.build-command }}

@@ -1,0 +1,74 @@
+name: Go Lint
+
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        description: Go version
+        required: false
+        type: string
+        default: "1.27.3"
+
+      lint-version:
+        description: golangci-lint version
+        required: false
+        type: string
+        default: "v2.15.0"
+
+      runner:
+        description: GitHub Actions runner
+        required: false
+        type: string
+        default: ubuntu-24.04
+
+      working-directory:
+        description: Go module working directory
+        required: false
+        type: string
+        default: .
+
+    secrets:
+      CI_APP_PRIVATE_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  golangci:
+    name: lint
+    runs-on: ${{ inputs.runner }}
+
+    env:
+      GOPRIVATE: github.com/Origami-Systems/*
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Generate GitHub App token
+        uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          client-id: ${{ vars.CI_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: go-shared
+
+      - name: Configure Git authentication
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/Origami-Systems/".insteadOf "https://github.com/Origami-Systems/"
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ inputs.go-version }}
+          cache-dependency-path: ${{ inputs.working-directory }}/go.sum
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: ${{ inputs.lint-version }}
+          working-directory: ${{ inputs.working-directory }}

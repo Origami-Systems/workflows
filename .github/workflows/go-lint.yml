@@ -62,7 +62,7 @@ jobs:
           git config --global url."https://x-access-token:${GH_TOKEN}@github.com/Origami-Systems/".insteadOf "https://github.com/Origami-Systems/"
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: ${{ inputs.go-version }}
           cache-dependency-path: ${{ inputs.working-directory }}/go.sum

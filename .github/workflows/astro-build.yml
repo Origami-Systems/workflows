@@ -1,88 +1,89 @@
 name: Astro Build
 
 on:
-    workflow_call:
-        inputs:
-            runner:
-                description: GitHub Actions runner
-                type: string
-                default: ubuntu-latest
+  workflow_call:
+    inputs:
+      runner:
+        description: GitHub Actions runner
+        type: string
+        default: ubuntu-latest
 
-            node-version:
-                description: Node.js version
-                type: string
-                default: "26.13.1"
+      node-version:
+        description: Node.js version
+        type: string
+        default: "26.13.1"
 
-            package-manager:
-                description: Package manager and version
-                type: string
-                default: "pnpm@12.23.0"
+      package-manager:
+        description: Package manager and version
+        type: string
+        default: "pnpm@12.23.0"
 
-            build-command:
-                description: Command used to build the site
-                type: string
-                default: pnpm run build
+      build-command:
+        description: Command used to build the site
+        type: string
+        default: pnpm run build
 
-            path:
-                description: Path to the Astro project
-                type: string
-                default: .
+      path:
+        description: Path to the Astro project
+        type: string
+        default: .
 
-            deploy:
-                description: Deploy to GitHub Pages
-                type: boolean
-                default: true
+      deploy:
+        description: Deploy to GitHub Pages
+        type: boolean
+        default: true
 
 permissions:
-    contents: read
-    pages: write
-    packages: read
-    id-token: write
+  contents: read
+  pages: write
+  packages: read
+  id-token: write
 
 concurrency:
-    group: pages
-    cancel-in-progress: false
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-    build:
-        runs-on: ${{ inputs.runner }}
+  build:
+    runs-on: ${{ inputs.runner }}
 
-        permissions:
-            contents: read
-            packages: read
+    permissions:
+      contents: read
+      packages: read
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-            - name: Configure GitHub Packages
-              run: |
-                  echo '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}' >> ~/.npmrc
-            
-            - name: Install, build, and upload site
-              uses: withastro/action@v6
-              with:
-                  path: ${{ inputs.path }}
-                  node-version: ${{ inputs.node-version }}
-                  package-manager: ${{ inputs.package-manager }}
-                  build-cmd: ${{ inputs.build-command }}
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Configure GitHub Packages
+        run: |
+          # shellcheck disable=SC2016
+          echo '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}' >> ~/.npmrc
 
-    deploy:
-        if: inputs.deploy
-        needs: build
-        runs-on: ${{ inputs.runner }}
+      - name: Install, build, and upload site
+        uses: withastro/action@v6
+        with:
+          path: ${{ inputs.path }}
+          node-version: ${{ inputs.node-version }}
+          package-manager: ${{ inputs.package-manager }}
+          build-cmd: ${{ inputs.build-command }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-        permissions:
-            pages: write
-            id-token: write
+  deploy:
+    if: inputs.deploy
+    needs: build
+    runs-on: ${{ inputs.runner }}
 
-        environment:
-            name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
 
-        steps:
-            - name: Deploy to GitHub Pages
-              id: deployment
-              uses: actions/deploy-pages@v5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

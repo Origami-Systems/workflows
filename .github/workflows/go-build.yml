@@ -63,6 +63,16 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: go-shared
 
+      - name: Verify access to go-shared
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0="url.https://x-access-token:${GH_TOKEN}@github.com/Origami-Systems/.insteadOf"
+          export GIT_CONFIG_VALUE_0="https://github.com/Origami-Systems/"
+          git ls-remote https://github.com/Origami-Systems/go-shared.git HEAD > /dev/null
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
 

@@ -38,7 +38,7 @@ For a release, explicitly set `push: true` and the intended `tag`. Restrict the 
 
 ## Go
 
-`go-lint.yml` runs golangci-lint and needs `contents: read`. `go-build.yml` builds a container and requires `contents: read` and `packages: write`, even for `push: false` under the current contract. Both require the caller's `CI_APP_PRIVATE_KEY` secret and `CI_APP_CLIENT_ID` variable for a GitHub App installed with access to `go-shared`. The build passes its App token to Docker as the `github_token` BuildKit secret. The Dockerfile must consume that secret without copying it into an image layer.
+`go-lint.yml` runs golangci-lint and needs `contents: read`. `go-build.yml` builds a container and requires `contents: read` and `packages: write`, even for `push: false` under the current contract. Both require the caller's `CI_APP_PRIVATE_KEY` secret and `CI_APP_CLIENT_ID` variable for a GitHub App installed with read access to `go-shared`. The build passes its App token to Docker as the `github_token` and `ORIGAMI_SYSTEMS_GO_PACKAGES` BuildKit secrets. Dockerfiles can consume either name and must not copy the token into an image layer.
 
 ```yaml
 jobs:

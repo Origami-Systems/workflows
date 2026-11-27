@@ -30,6 +30,7 @@ permissions:
 jobs:
     build:
         runs-on: ${{ inputs.runner }}
+        timeout-minutes: 30
 
         defaults:
             run:
@@ -44,13 +45,9 @@ jobs:
               with:
                   node-version: ${{ inputs.node-version }}
                   cache: true
+                  working-directory: ${{ inputs.working-directory }}
                   registry-url: https://npm.pkg.github.com/
                   scope: "@origami-systems"
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Install dependencies
-              run: vp install
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

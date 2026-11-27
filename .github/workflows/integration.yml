@@ -1,0 +1,35 @@
+name: Test reusable checks
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/**
+      - tests/fixtures/**
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/**
+      - tests/fixtures/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  astro-root-fixture:
+    uses: ./.github/workflows/astro-check.yml
+    with:
+      working-directory: tests/fixtures/root
+      build-command: npm run build
+
+  astro-nested-fixture:
+    uses: ./.github/workflows/astro-check.yml
+    with:
+      working-directory: tests/fixtures/nested/app
+      build-command: npm run build
+
+  nuxt-nested-fixture:
+    uses: ./.github/workflows/nuxt-check.yml
+    with:
+      working-directory: tests/fixtures/nested/app

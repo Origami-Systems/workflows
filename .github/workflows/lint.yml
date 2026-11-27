@@ -6,9 +6,11 @@ on:
             - main
         paths:
             - ".github/workflows/**"
+            - ".github/actionlint.yml"
     pull_request:
         paths:
             - ".github/workflows/**"
+            - ".github/actionlint.yml"
     workflow_dispatch:
 
 permissions:
@@ -17,9 +19,15 @@ permissions:
 jobs:
   actionlint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - name: Check workflow files
-        uses: docker://rhysd/actionlint:latest
+      - name: Set up Go
+        uses: actions/setup-go@v7
         with:
-          args: -color
+          go-version: "1.27.3"
+          cache: false
+      - name: Install actionlint
+        run: go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+      - name: Check workflow files
+        run: actionlint -color

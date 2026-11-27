@@ -1,0 +1,8 @@
+{
+  "name": "workflow-root-fixture",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"require('node:assert').strictEqual(require('./package.json').name, 'workflow-root-fixture')\""
+  }
+}

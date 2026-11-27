@@ -38,6 +38,7 @@ jobs:
   golangci:
     name: lint
     runs-on: ${{ inputs.runner }}
+    timeout-minutes: 30
 
     env:
       GOPRIVATE: github.com/Origami-Systems/*
@@ -59,7 +60,10 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/Origami-Systems/".insteadOf "https://github.com/Origami-Systems/"
+          config_file="$(mktemp "${RUNNER_TEMP}/go-git-config.XXXXXX")"
+          echo "GIT_CONFIG_GLOBAL=$config_file" >> "$GITHUB_ENV"
+          echo "ORIGAMI_GIT_CONFIG=$config_file" >> "$GITHUB_ENV"
+          git config --file "$config_file" url."https://x-access-token:${GH_TOKEN}@github.com/Origami-Systems/".insteadOf "https://github.com/Origami-Systems/"
 
       - name: Set up Go
         uses: actions/setup-go@v7
@@ -72,3 +76,10 @@ jobs:
         with:
           version: ${{ inputs.lint-version }}
           working-directory: ${{ inputs.working-directory }}
+
+      - name: Remove Git authentication
+        if: always()
+        run: |
+          if [ -n "${ORIGAMI_GIT_CONFIG:-}" ]; then
+            rm -f "$ORIGAMI_GIT_CONFIG"
+          fi

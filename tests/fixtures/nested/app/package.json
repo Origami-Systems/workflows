@@ -1,0 +1,14 @@
+{
+  "name": "workflow-nuxt-fixture",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node -e \"require('node:assert').strictEqual(require('./package.json').name, 'workflow-nuxt-fixture')\"",
+    "nuxt": "nuxt"
+  },
+  "dependencies": {
+    "nuxt": "4.7.0",
+    "vite-plus": "1.4.0"
+  }
+}

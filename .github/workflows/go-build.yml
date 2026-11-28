@@ -8,6 +8,12 @@ on:
         required: true
         type: string
 
+      tag:
+        description: Image tag to use instead of the version and latest tags
+        required: false
+        type: string
+        default: ""
+
       platforms:
         description: Target Docker platforms
         required: false
@@ -102,8 +108,9 @@ jobs:
           platforms: ${{ inputs.platforms }}
 
           tags: |
-            ${{ inputs.publish-latest && format('ghcr.io/origami-systems/{0}:latest', inputs.image) || '' }}
-            ghcr.io/origami-systems/${{ inputs.image }}:${{ steps.version.outputs.version }}
+            ${{ inputs.tag != '' && format('ghcr.io/origami-systems/{0}:{1}', inputs.image, inputs.tag) || '' }}
+            ${{ inputs.tag == '' && inputs.publish-latest && format('ghcr.io/origami-systems/{0}:latest', inputs.image) || '' }}
+            ${{ inputs.tag == '' && format('ghcr.io/origami-systems/{0}:{1}', inputs.image, steps.version.outputs.version) || '' }}
             ghcr.io/origami-systems/${{ inputs.image }}:${{ github.sha }}
 
           cache-from: type=gha,scope=go-${{ inputs.image }}-${{ hashFiles(inputs.dockerfile) }}

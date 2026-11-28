@@ -61,7 +61,7 @@ jobs:
       CI_APP_PRIVATE_KEY: ${{ secrets.CI_APP_PRIVATE_KEY }}
 ```
 
-Go lint inputs are `go-version` (default `1.27.3`), `lint-version` (default `v2.15.0`), `runner` (default `ubuntu-24.04`), and `working-directory` (default `.`). Go build requires an `image` and a root `VERSION` file. Its other inputs are `platforms` (default `linux/amd64,linux/arm64`), `dockerfile` (default `Dockerfile.production`), `context` (default `.`), `push` (default `true`), and `publish-latest` (default `true`). It tags with `VERSION` and the commit SHA, plus `latest` when `publish-latest` is true. Set `publish-latest: false` for any build that must not update that tag. The version tag can also be overwritten, so choose `VERSION` and release triggers carefully.
+Go lint inputs are `go-version` (default `1.27.3`), `lint-version` (default `v2.15.0`), `runner` (default `ubuntu-24.04`), and `working-directory` (default `.`). Go build requires an `image` and a root `VERSION` file. Its other inputs are `tag` (default empty), `platforms` (default `linux/amd64,linux/arm64`), `dockerfile` (default `Dockerfile.production`), `context` (default `.`), `push` (default `true`), and `publish-latest` (default `true`). When `tag` is set, the image uses that tag and the commit SHA. Otherwise it uses `VERSION` and the commit SHA, plus `latest` when `publish-latest` is true. For pull requests, pass `tag: ${{ format('pr-{0}', github.event.pull_request.number) }}` to avoid overwriting release tags. Choose release triggers carefully because version and latest tags can be overwritten.
 
 ## Astro
 
